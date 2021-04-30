@@ -11,28 +11,40 @@ app = FastAPI()
 
 SKLINEAR_MODEL = SKLinearImageModel(load_model=True)
 
+USER_UPLOADS = 'user_uploads'
+
+DESCRIPTION = """
+request:\n
+    {"image": *.jpg file}
+response:\n
+    {
+       "filename": image filename,
+       "label": predicted class label, 'cat', 'dog', 'unknown', or 'unsupported'
+    }
+"""
+
 
 @app.post("/predict/sklinear")
 async def predict_sklinear(image: UploadFile = File(...),
-                           summary="Predict the image class with SKLinearImageModel"):
+                           summary="Predict the image class with SKLinearImageModel",
+                           description=DESCRIPTION):
     """
-    Predicts image class: 'cat', 'dog', 'uncnown_class', or 'unsupported'.
+    Predicts image class: 'cat', 'dog', 'unknown', or 'unsupported'.
     Use SKLinearImageModel for prediction
     - **image** : *.jpg file
     """
-    # TODO: process file in memory without storying to disc
-    filepath = os.path.join("user_uploads", image.filename)
-    with open(filepath, "wb") as buffer:
-        shutil.copyfileobj(image.file, buffer)
-    label = 'unknown_class'
-
-    try:
-        dir_parser = DirectoryParser("user_uploads")
-    except ValueError:
+    if image.filename[-3:] not in ('jpg', 'png'):
         return {"filename": image.filename, 'label': 'unsupported'}
 
-    for filepath in dir_parser.full_path_image_files:
-        feature_extractor = ImageFeatureExtractor([filepath])
-        label = SKLINEAR_MODEL.predict(feature_extractor.X)
+    if not os.path.exists(USER_UPLOADS):
+        os.mkdir(USER_UPLOADS)
+    filepath = os.path.join(USER_UPLOADS, image.filename)
+    with open(filepath, "wb") as buffer:
+        shutil.copyfileobj(image.file, buffer)
+
+    dir_parser = DirectoryParser(USER_UPLOADS)
+    feature_extractor = ImageFeatureExtractor()
+    X, _y = feature_extractor.transform_image_to_dataset(dir_parser.full_path_image_files)
+    label = SKLINEAR_MODEL.predict(X)
 
     return {"filename": image.filename, 'label': label}

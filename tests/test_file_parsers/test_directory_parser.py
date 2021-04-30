@@ -35,7 +35,7 @@ class DirectoryParserTest(unittest.TestCase):
     def test_dir_with_images(self):
         path = os.path.join(self.base_path, "data/dir_test")
         testable = DirectoryParser(path)
-        self.assertEqual(['cat.0.jpg', 'dog.2582.jpg'], testable.img_filenames)
+        self.assertEqual(['cat.780.jpg', 'dog.2582.jpg'], testable.img_filenames)
         msg = f"Found 2 jpg/png file(s) out of 3 file(s).\n"\
             "Unsupported files: {'1.txt'}"
         self.assertEqual(msg, str(testable))

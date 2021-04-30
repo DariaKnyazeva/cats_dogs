@@ -1,4 +1,4 @@
-# cats_and_dogs
+# cats_dogs
 ML exercise to classify cats and dogs images.
 
 Implemented and trained model that uses `sklearn.linear_model.SGDClassifier` classifier.
@@ -107,12 +107,14 @@ additional information:
 pytest
 ```
 
-### REST API
+## REST API
 
-## Start web server
+### Start web server
 
-cd to cats_and_dogs directory, activate virtual environemnt and run 
+cd to cats_dogs directory, activate virtual environemnt and run 
 
 `uvicorn rest.main:app --reload`
+
+### Swagger documentation
 
 Open your browser and see REST API documentation at `http://127.0.0.1:8000/docs`
