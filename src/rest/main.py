@@ -1,17 +1,14 @@
-import os
-import shutil
+import numpy as np
 
 from fastapi import FastAPI, File, UploadFile
+from skimage.io import imread
+from skimage.transform import resize
 
-from file_parsers import DirectoryParser
-from ml.sklearn import ImageFeatureExtractor
 from ml import SKLinearImageModel
 
-app = FastAPI()
+app = FastAPI(title="Cats and Dogs")
 
 SKLINEAR_MODEL = SKLinearImageModel(load_model=True)
-
-USER_UPLOADS = 'user_uploads'
 
 DESCRIPTION = """
 request:\n
@@ -36,15 +33,9 @@ async def predict_sklinear(image: UploadFile = File(...),
     if image.filename[-3:] not in ('jpg', 'png'):
         return {"filename": image.filename, 'label': 'unsupported'}
 
-    if not os.path.exists(USER_UPLOADS):
-        os.mkdir(USER_UPLOADS)
-    filepath = os.path.join(USER_UPLOADS, image.filename)
-    with open(filepath, "wb") as buffer:
-        shutil.copyfileobj(image.file, buffer)
-
-    dir_parser = DirectoryParser(USER_UPLOADS)
-    feature_extractor = ImageFeatureExtractor()
-    X, _y = feature_extractor.transform_image_to_dataset(dir_parser.full_path_image_files)
+    im = imread(image.file)
+    im = resize(im, (150, 150))
+    X = np.array([im, ])
     label = SKLINEAR_MODEL.predict(X)
 
     return {"filename": image.filename, 'label': label}
