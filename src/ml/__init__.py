@@ -1,0 +1,1 @@
+from .sklearn.model import SKLinearImageModel
