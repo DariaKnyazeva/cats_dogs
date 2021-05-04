@@ -1,10 +1,12 @@
 import numpy as np
 
 from fastapi import FastAPI, File, UploadFile
+from pydantic import BaseModel
 from skimage.io import imread
 from skimage.transform import resize
 
 from ml import SKLinearImageModel
+from ml.model import LABEL
 
 app = FastAPI(title="Cats and Dogs")
 
@@ -19,6 +21,15 @@ response:\n
        "label": predicted class label, 'cat', 'dog', 'unknown', or 'unsupported'
     }
 """
+
+
+class DataResponse(BaseModel):
+    """
+    - filename - name of file
+    - label - class label
+    """
+    filename: str
+    label: LABEL
 
 
 @app.post("/predict/sklinear")
@@ -38,4 +49,4 @@ async def predict_sklinear(image: UploadFile = File(...),
     X = np.array([im, ])
     label = SKLINEAR_MODEL.predict(X)
 
-    return {"filename": image.filename, 'label': label}
+    return DataResponse(**{"filename": image.filename, 'label': label})

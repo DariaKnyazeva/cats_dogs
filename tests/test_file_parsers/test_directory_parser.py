@@ -20,6 +20,8 @@ class DirectoryParserTest(unittest.TestCase):
 
     def test_dir_empty(self):
         path = os.path.join(self.base_path, "data/dir_test_empty")
+        if not os.path.exists(path):
+            os.mkdir(path)
         testable = DirectoryParser(path)
         self.assertEqual([], testable.img_filenames)
         msg = f"Did not find any jpg/png files in the {path}"

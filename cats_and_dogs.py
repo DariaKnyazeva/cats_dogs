@@ -31,7 +31,7 @@ if __name__ == "__main__":
     arg_parser.add_argument('--pkl_file',
                             help='file name to load the trained model from')
     arg_parser.add_argument('-p', '--probability_threshold', default=0.75,
-                            help='imit to accept probability to predict a class.')
+                            help='Limit to accept probability to predict a class.')
     parsed_args = arg_parser.parse_args(sys.argv[1:])
 
     input_directory = parsed_args.dir
