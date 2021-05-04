@@ -7,7 +7,7 @@ import sys
 import textwrap
 
 from ml import ImageFeatureExtractor, SKLinearImageModel
-from file_parsers import DirectoryParser
+from directory_parser import DirectoryParser
 
 
 DOC = """

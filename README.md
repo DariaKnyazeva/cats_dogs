@@ -2,7 +2,7 @@
 ML exercise to classify cats and dogs images.
 
 Implemented and trained model that uses `sklearn.linear_model.SGDClassifier` classifier.
-The input image is resized to 150x150 pixels by default, and transformed into `numpy array`. Some data preprocessing takes place before model training and prediction: RGB is transgormed to grey and then (hogified)[https://learnopencv.com/histogram-of-oriented-gradients/].
+The input image is resized to 150x150 pixels by default, and transformed into `numpy array`. Some data preprocessing takes place before model training and prediction: RGB is transgormed to grey and then [hogified](https://learnopencv.com/histogram-of-oriented-gradients/).
 
 It is possible to use more precise models by inheriting from the abstraction `ml.model.BaseModel`, which provides interface for training and prediction.
 
@@ -64,16 +64,15 @@ Example output:
     labels: ['cat' 'dog']
     labels_distribution: {'cat': 253, 'dog': 161}
 
-    Accuracy: 0.58
+    Accuracy: 0.67
               precision    recall  f1-score   support
 
-          cat       0.83      0.60      0.70        58
-          dog       0.43      0.52      0.47        25
-unknown_class       0.00      0.00      0.00         0
+         cat       0.67      0.67      0.67      2469
+         dog       0.68      0.66      0.67      2531
 
-     accuracy                           0.58        83
-    macro avg       0.42      0.37      0.39        83
- weighted avg       0.71      0.58      0.63        83
+   micro avg       0.68      0.67      0.67      5000
+   macro avg       0.68      0.67      0.67      5000
+weighted avg       0.68      0.67      0.67      5000
  ```
 
 ### Classify images from the provided directory
@@ -114,7 +113,9 @@ pytest
 
 ### Start web server
 
-cd to cats_dogs directory, activate virtual environemnt and run 
+`cd cats_dogs`
+
+`source venv/bin/activate`
 
 `uvicorn rest.main:app --reload`
 
