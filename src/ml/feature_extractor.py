@@ -1,10 +1,12 @@
 from abc import ABC, abstractmethod
-import joblib
-import os
 from collections import defaultdict
+import os
 
 import dask.array as da
+import joblib
 import numpy as np
+from PIL import Image, ImageOps
+from typing import Generator, Iterable, Tuple
 from skimage.io import imread
 from sklearn.model_selection import train_test_split
 from skimage.transform import resize
@@ -16,11 +18,18 @@ class BaseImageFeatureExtractor(ABC):
     """
 
     @abstractmethod
-    def transform_image_to_dataset(self, image_paths, image_size=(150, 150), batch_size=1000):
+    def transform_image_to_dataset(self,
+                                   image_paths: Iterable[str],
+                                   image_size: Tuple[int, int] = (150, 150),
+                                   batch_size: int = 1000) -> Generator[Tuple[np.ndarray, np.ndarray],
+                                                                        None,
+                                                                        None]:
         """
-        Rescales image from the given filepath to the provided size
-        and transforms it to an array.
-        @param image_paths: list of full paths to images
+        Rescales image from the given filepath to the provided image size
+        and transforms it to an array. Yields batches of image arrays.
+        Labels are extracted from image paths (filename starts with a label).
+
+        @param image_paths: iterable of full paths to images
         @param image_size: size for image scaling
         @param batch_size: batch size to split large dataset into
         Returns generator of (X, y)
@@ -30,7 +39,8 @@ class BaseImageFeatureExtractor(ABC):
         pass
 
     @abstractmethod
-    def combine_batches(self, batches, verbose=True):
+    def combine_batches(self, batches: Iterable[np.ndarray],
+                        verbose: bool = True) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         """
         Combines large dataset batches into train, validation datasets.
         If verbose is True prints stats on the dataset.
@@ -43,7 +53,9 @@ class ImageFeatureExtractor(BaseImageFeatureExtractor):
     Class for extracting features from image data.
     """
 
-    def _batch_slicer(self, iterable, size=1000):
+    def _batch_slicer(self,
+                      iterable: Iterable,
+                      size: int = 1000) -> Generator[list, None, None]:
         batch = []
 
         for i, item in enumerate(iterable, start=1):
@@ -55,7 +67,10 @@ class ImageFeatureExtractor(BaseImageFeatureExtractor):
         if batch:
             yield batch
 
-    def _filter_per_batch(self, batch, image_size=(150, 150)):
+    def _transform_image_per_batch(self,
+                                   batch: Iterable[str],
+                                   image_size: Tuple[int, int] = (150, 150)) -> Tuple[np.ndarray,
+                                                                                      np.ndarray]:
         img_data = defaultdict(list)
         for filepath in batch:
             label = self._get_label_from_filepath(filepath)
@@ -69,17 +84,25 @@ class ImageFeatureExtractor(BaseImageFeatureExtractor):
 
         return X, y
 
-    def transform_image_to_dataset(self, image_paths,
-                                   image_size=(150, 150),
-                                   batch_size=1000):
+    def transform_image_to_dataset(self,
+                                   image_paths: Iterable[str],
+                                   image_size: Tuple[int, int] = (150, 150),
+                                   batch_size: int = 1000) -> Generator[Tuple[np.ndarray, np.ndarray],
+                                                                        None,
+                                                                        None]:
         for batch in self._batch_slicer(image_paths, int(batch_size)):
-            X, y = self._filter_per_batch(batch, image_size=image_size)
+            X, y = self._transform_image_per_batch(batch, image_size=image_size)
             yield (X, y)
 
-    def _get_label_from_filepath(self, filepath):
+    def _get_label_from_filepath(self, filepath: str) -> str:
+        """
+        Gets class label from filepath.
+        File name starts with the label in training data sets.
+        """
         return os.path.split(filepath)[-1][:3]
 
-    def combine_batches(self, batches, verbose=True):
+    def combine_batches(self, batches: Iterable[np.ndarray],
+                        verbose: bool = True) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         Xy = list(zip(*batches))
         X_large = da.concatenate([X for X in Xy[0]], axis=0)
         joblib.dump(X_large, "xlarge.pkl")
@@ -101,3 +124,16 @@ class ImageFeatureExtractor(BaseImageFeatureExtractor):
             print(f"Labels {da.unique(y_large).compute()}")
 
         return (X_train, y_train, X_test, y_test)
+
+    def rotate_if_transposed(self, imgpath: str) -> Image:
+        """
+        If imgpath does not exist, returns None.
+
+        If an image has an EXIF Orientation tag, return a new image
+        that is transposed accordingly. Otherwise, return a copy of the image.
+        """
+        if not os.path.exists(imgpath):
+            return None
+
+        img = Image.open(imgpath)
+        return ImageOps.exif_transpose(img)

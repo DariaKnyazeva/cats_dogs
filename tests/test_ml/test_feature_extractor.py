@@ -1,8 +1,9 @@
 import os
 import unittest
+from PIL import Image
 
 
-from ml import ImageFeatureExtractor
+from src.ml import ImageFeatureExtractor
 
 
 class TestImageFeatureExtractor(unittest.TestCase):
@@ -20,3 +21,19 @@ class TestImageFeatureExtractor(unittest.TestCase):
         for (X, y) in batches:
             self.assertTupleEqual((2, ) + self.dimension, X.shape)
             self.assertTupleEqual((2, ), y.shape)
+
+    def test_rotate_if_transposed(self):
+        imgpath = os.path.join(self.base_path, "data/dog_rotated_90_3.jpg")
+        testable = ImageFeatureExtractor()
+        # import piexif
+        # picture = imgpath
+        # exif_dict = piexif.load(picture)
+        # if piexif.ImageIFD.Orientation in exif_dict["0th"]:
+        #     orientation = exif_dict["0th"][piexif.ImageIFD.Orientation]
+        #     print(orientation)
+        img = Image.open(imgpath)
+        print(img.info)
+        print(img.width)
+        img1 = testable.rotate_if_transposed(imgpath)
+        print(img1.width)
+        img1.save(os.path.join(self.base_path, "data/dog_rotated.jpg"))

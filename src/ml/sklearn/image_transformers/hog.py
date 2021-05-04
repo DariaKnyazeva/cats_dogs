@@ -1,3 +1,5 @@
+from typing import Optional, Tuple
+
 import numpy as np
 from skimage.feature import hog
 from sklearn.base import BaseEstimator, TransformerMixin
@@ -9,19 +11,21 @@ class HogTransformer(BaseEstimator, TransformerMixin):
     Calculates hog features for each img
     """
 
-    def __init__(self, y=None, orientations=9,
-                 pixels_per_cell=(8, 8),
-                 cells_per_block=(3, 3), block_norm='L2-Hys'):
+    def __init__(self, y: Optional[np.ndarray],
+                 orientations: int = 9,
+                 pixels_per_cell: Tuple[int, int] = (8, 8),
+                 cells_per_block: Tuple[int, int] = (3, 3),
+                 block_norm: str = 'L2-Hys') -> None:
         self.y = y
         self.orientations = orientations
         self.pixels_per_cell = pixels_per_cell
         self.cells_per_block = cells_per_block
         self.block_norm = block_norm
 
-    def fit(self, X, y=None):
+    def fit(self, X: np.ndarray, y: np.ndarray = None) -> BaseEstimator:
         return self
 
-    def transform(self, X, y=None):
+    def transform(self, X: np.ndarray, y: np.ndarray = None) -> np.ndarray:
 
         def local_hog(X):
             return hog(X,
