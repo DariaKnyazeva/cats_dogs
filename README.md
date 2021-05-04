@@ -2,15 +2,18 @@
 ML exercise to classify cats and dogs images.
 
 Implemented and trained model that uses `sklearn.linear_model.SGDClassifier` classifier.
-The trained model does not have decent accuracy due to low laptop capacity process large amount of data.
-It is possible to use more precise models by inheriting from the abstraction `ml.model.BaseModel`.
+The input image is resized to 150x150 pixels by default, and transformed into `numpy array`. Some data preprocessing takes place before model training and prediction: RGB is transgormed to grey and then (hogified)[https://learnopencv.com/histogram-of-oriented-gradients/].
+
+It is possible to use more precise models by inheriting from the abstraction `ml.model.BaseModel`, which provides interface for training and prediction.
 
 ## Environment setup:
 Use Python 3.7
 
-Add src to python path (Linux):
+Add src to python path 
 
-`export PYTHONPATH=$PYTHONPATH:src`
+```
+export PYTHONPATH=$PYTHONPATH:src
+```
 
 Install virtual environment:
 ```
@@ -41,6 +44,7 @@ required argument:
 optional arguments:
   * -h, --help           show this help message and exit
   * --pkl_file PKL_FILE  Pickle file name to save the trained model. The default value is 'trained_models/fitted_model.pkl'
+  * --batch_size' BATCH_SIZE  Batch size for large amount of training data. Default is 1000.
 
 additional information:
     Path to the directory can be either full,
@@ -82,9 +86,8 @@ Cats and docs recogniser.
 optional arguments:
   * -h, --help           show this help message and exit
   * --dir DIR            Path to the input directory with image files.
-  * --model_file MODEL_FILE  Pickle or tf file name to load the trained model from
-  * --model {sklearn,tensorflow}
-                        Model class to use for prediction. The default is sklearn
+  * --pkl_file PKL_FILE  Pickle or file name to load the trained model from. Default is 'trained_models/hog_sklearn.pkl'
+  * -p, --probability_threshold PROBABILITY_THRESHOLD. Limit to accept probability to predict a class. Default is 0.75
 
 ```
 additional information:
@@ -93,12 +96,12 @@ additional information:
     Example output:
         Found 24 jpg/png file(s) out of 25 file(s).
         Unsupported files: {'some_file.txt'}
-        image_1.jpg: cat
-        image_2.png: dog
-        image_3.jpg: unknown_class
-        image_4.jpg: cat
+        image_1.jpg: ['cat']
+        image_2.png: ['dog']
+        image_3.jpg: ['unknown_class']
+        image_4.jpg: ['cat']
     Example usage:
-        python cats_and_dogs.py --dir data/demo --pkl_file trained_models/f_12.pkl
+        python cats_and_dogs.py --dir data/demo --pkl_file trained_models/hog_sklearn.pkl
 ```
 
 ## Run unit tests

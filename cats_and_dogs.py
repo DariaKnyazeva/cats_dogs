@@ -18,7 +18,7 @@ additional information:
         image_3.jpg: unknown_class
         image_4.jpg: cat
     Example usage:
-        python cats_and_dogs.py --dir data/demo --pkl_file trained_models/f_12.pkl
+        python cats_and_dogs.py --dir data/demo --pkl_file trained_models/hod_sklearn.pkl
 """
 
 if __name__ == "__main__":
@@ -30,10 +30,13 @@ if __name__ == "__main__":
                             help='Path to the input directory with image files.')
     arg_parser.add_argument('--pkl_file',
                             help='file name to load the trained model from')
+    arg_parser.add_argument('-p', '--probability_threshold', default=0.75,
+                            help='imit to accept probability to predict a class.')
     parsed_args = arg_parser.parse_args(sys.argv[1:])
 
     input_directory = parsed_args.dir
     pkl_file = parsed_args.pkl_file
+    probability_threshold = float(parsed_args.probability_threshold)
 
     try:
         dir_parser = DirectoryParser(input_directory)
@@ -43,7 +46,8 @@ if __name__ == "__main__":
 
     print(dir_parser)
 
-    model = SKLinearImageModel(pkl_file=pkl_file, load_model=True)
+    model = SKLinearImageModel(pkl_file=pkl_file, load_model=True,
+                               probability_threshold=probability_threshold)
     feature_extractor = ImageFeatureExtractor()
 
     for filepath in dir_parser.full_path_image_files:

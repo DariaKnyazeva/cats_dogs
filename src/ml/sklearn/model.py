@@ -16,7 +16,7 @@ class SKLinearImageModel(BaseModel):
     """
 
     def __init__(self,
-                 probability_threshhold=0.75,
+                 probability_threshold=0.75,
                  pkl_file='trained_models/hog_sklearn.pkl',
                  load_model=True):
         """
@@ -25,7 +25,7 @@ class SKLinearImageModel(BaseModel):
         - **load_model** : bool. If True, loads classifier from the pfovided Pickle,
             Use sklearn.linear_model.SGDClassifier classifier otherwise.
         """
-        self.probability_threshhold = probability_threshhold
+        self.probability_threshold = probability_threshold
 
         self.grayify = RGB2GrayTransformer()
         self.hogify = HogTransformer(
@@ -92,9 +92,9 @@ class SKLinearImageModel(BaseModel):
             self.classifier = opt_classifier
 
     def _predict_proba_to_label(self, proba):
-        if proba[0] >= self.probability_threshhold:
+        if proba[0] >= self.probability_threshold:
             return LABEL.CAT.value
-        elif proba[1] >= self.probability_threshhold:
+        elif proba[1] >= self.probability_threshold:
             return LABEL.DOG.value
         else:
             return LABEL.UNKNOWN.value
