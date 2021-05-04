@@ -16,6 +16,7 @@ class TestImageFeatureExtractor(unittest.TestCase):
 
     def test_get_transform_image_to_dataset(self):
         testable = ImageFeatureExtractor()
-        X, y = testable.transform_image_to_dataset(self.image_paths)
-        self.assertTupleEqual((2, ) + self.dimension, X.shape)
-        self.assertTupleEqual((2, ), y.shape)
+        batches = testable.transform_image_to_dataset(self.image_paths)
+        for (X, y) in batches:
+            self.assertTupleEqual((2, ) + self.dimension, X.shape)
+            self.assertTupleEqual((2, ), y.shape)

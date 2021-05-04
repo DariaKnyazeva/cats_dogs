@@ -1,7 +1,7 @@
 import joblib
 import mock
 import numpy as np
-from sklearn.calibration import CalibratedClassifierCV
+from dask_ml.wrappers import ParallelPostFit
 from sklearn.linear_model import SGDClassifier
 from sklearn.model_selection import train_test_split
 import unittest
@@ -31,11 +31,10 @@ class SKLinearImageModelTest(unittest.TestCase):
 
         mock_joblib.assert_called_once_with('1.pkl')
 
-    @mock.patch.object(CalibratedClassifierCV, 'predict_proba')
-    @mock.patch.object(CalibratedClassifierCV, 'fit')
-    @mock.patch.object(SGDClassifier, 'fit')
+    @mock.patch.object(ParallelPostFit, 'predict_proba')
+    @mock.patch.object(ParallelPostFit, 'fit')
     @mock.patch('ml.sklearn.model.SKLinearImageModel._preprocess_dataset')
-    def test_train(self, mock_preprocess_ds, mock_fit, mock_cv_fit, mock_predict_proba):
+    def test_train(self, mock_preprocess_ds, mock_fit, mock_predict_proba):
         X_train, X_test, y_train, y_test = train_test_split(
             self.X,
             self.y,
@@ -45,7 +44,7 @@ class SKLinearImageModelTest(unittest.TestCase):
         )
         X_train_prepared = X_train * 0.2
         mock_preprocess_ds.return_value = X_train_prepared
-        mock_cv_fit.return_value = CalibratedClassifierCV()
+        mock_fit.return_value = ParallelPostFit()
 
         testable = SKLinearImageModel(load_model=False)
         testable.train(X_train, y_train, X_test, y_test, verbose=False)
@@ -58,10 +57,10 @@ class SKLinearImageModelTest(unittest.TestCase):
         mock_predict_proba.assert_called_once()
 
     @mock.patch('ml.sklearn.model.SKLinearImageModel._preprocess_dataset')
-    @mock.patch.object(CalibratedClassifierCV, 'predict_proba')
+    @mock.patch.object(ParallelPostFit, 'predict_proba')
     @mock.patch('ml.sklearn.model.SKLinearImageModel.load')
     def test_predict(self, mock_load, mock_predict, mock_preprocess_ds):
-        mock_load.return_value = CalibratedClassifierCV()
+        mock_load.return_value = ParallelPostFit()
         mock_preprocess_ds.return_value = [1, 2, 3]
 
         testable = SKLinearImageModel()
