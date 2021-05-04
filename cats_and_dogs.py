@@ -2,8 +2,7 @@ import argparse
 import sys
 import textwrap
 
-from ml.sklearn import ImageFeatureExtractor
-from ml import SKLinearImageModel
+from ml import ImageFeatureExtractor, SKLinearImageModel
 from file_parsers import DirectoryParser
 
 
@@ -48,6 +47,7 @@ if __name__ == "__main__":
     feature_extractor = ImageFeatureExtractor()
 
     for filepath in dir_parser.full_path_image_files:
-        X, y = feature_extractor.transform_image_to_dataset([filepath])
-        prediction = model.predict(X)
-        print(f"{filepath}: {prediction}")
+        batches = feature_extractor.transform_image_to_dataset([filepath])
+        for (X, y) in batches:
+            prediction = model.predict(X)
+            print(f"{filepath}: {prediction}")

@@ -2,7 +2,7 @@ import os
 import unittest
 
 
-from ml.sklearn import ImageFeatureExtractor
+from ml import ImageFeatureExtractor
 
 
 class TestImageFeatureExtractor(unittest.TestCase):
@@ -19,13 +19,3 @@ class TestImageFeatureExtractor(unittest.TestCase):
         X, y = testable.transform_image_to_dataset(self.image_paths)
         self.assertTupleEqual((2, ) + self.dimension, X.shape)
         self.assertTupleEqual((2, ), y.shape)
-
-    def test_get_stats(self):
-        testable = ImageFeatureExtractor()
-        testable.transform_image_to_dataset(self.image_paths)
-        stats = testable.get_stats()
-        self.assertEqual(2, stats['number_of_samples'])
-        self.assertTupleEqual(self.dimension, stats['image_shape'])
-        self.assertListEqual(['cat', 'dog'], list(stats['labels']))
-        self.assertDictEqual({'cat': 1, 'dog': 1},
-                             stats['labels_distribution'])

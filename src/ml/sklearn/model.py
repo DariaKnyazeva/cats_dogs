@@ -1,5 +1,6 @@
 import joblib
-from sklearn.calibration import CalibratedClassifierCV
+
+from dask_ml.wrappers import ParallelPostFit
 from sklearn.linear_model import SGDClassifier
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import accuracy_score, classification_report
@@ -15,8 +16,8 @@ class SKLinearImageModel(BaseModel):
     """
 
     def __init__(self,
-                 probability_threshhold=0.80,
-                 pkl_file='trained_models/f_12.pkl',
+                 probability_threshhold=0.75,
+                 pkl_file='trained_models/hog_sklearn.pkl',
                  load_model=True):
         """
         - **probability_threshhold** : float. Prediction probability threshold to predict the class label
@@ -28,8 +29,8 @@ class SKLinearImageModel(BaseModel):
 
         self.grayify = RGB2GrayTransformer()
         self.hogify = HogTransformer(
-            pixels_per_cell=(14, 14),
-            cells_per_block=(2, 2),
+            pixels_per_cell=(8, 8),
+            cells_per_block=(3, 3),
             orientations=9,
             block_norm='L2-Hys'
         )
@@ -38,7 +39,10 @@ class SKLinearImageModel(BaseModel):
         if load_model:
             self.classifier = self.load(pkl_file)
         else:
-            self.classifier = SGDClassifier(random_state=42, max_iter=1000, tol=1e-3)
+            self.classifier = SGDClassifier(random_state=42,
+                                            max_iter=1500,
+                                            tol=1e-3,
+                                            loss='log')
 
     def save(self, destination):
         joblib.dump(self.classifier, destination)
@@ -52,22 +56,24 @@ class SKLinearImageModel(BaseModel):
         except FileNotFoundError:
             raise ModelException(f"File {source} not found")
 
-    def _preprocess_dataset(self, X):
+    def _preprocess_dataset(self, X, need_scale=True):
         """
         Transform dataset to gray, then to hog and scale it.
         """
         X_gray = self.grayify.fit_transform(X)
         X_hog = self.hogify.fit_transform(X_gray)
-        return self.scalify.fit_transform(X_hog)
+        if need_scale:
+            return self.scalify.fit_transform(X_hog)
+        else:
+            return X_hog
 
-    def train(self, X_train, y_train, X_test, y_test, verbose=True, optimize=False):
+    def train(self, X_train, y_train, X_test, y_test,
+              verbose=True,
+              optimize=False):
         X_train_prepared = self._preprocess_dataset(X_train)
 
-        fitted_model = self.classifier.fit(X_train_prepared, y_train)
-
-        # Need to use the calibrator as the linear classifier does not have predict_proba
-        calibrator = CalibratedClassifierCV(fitted_model, cv='prefit')
-        self.classifier = calibrator.fit(X_train_prepared, y_train)
+        clf = ParallelPostFit(self.classifier, scoring='accuracy')
+        self.classifier = clf.fit(X_train_prepared, y_train)
 
         X_test_prepared = self._preprocess_dataset(X_test)
         prediction = self.classifier.predict_proba(X_test_prepared)
@@ -75,14 +81,14 @@ class SKLinearImageModel(BaseModel):
         y_proba_list = [self._predict_proba_to_label(proba) for proba in prediction]
 
         if verbose:
-            self.evaluate(y_proba_list, y_test)
+            self.evaluate(y_proba_list, y_test, classes=self.classifier.classes_)
 
         if optimize:
             opt_classifier = ImageModelOptimiser(self).optimize(X_train, y_train)
-            prediction = opt_classifier.predict_proba(X_test_prepared)
+            prediction = opt_classifier.predict(X_test_prepared)
             y_proba_list = [self._predict_proba_to_label(proba) for proba in prediction]
             if verbose:
-                self.evaluate(y_proba_list, y_test)
+                self.evaluate(prediction, y_test)
             self.classifier = opt_classifier
 
     def _predict_proba_to_label(self, proba):
@@ -94,12 +100,12 @@ class SKLinearImageModel(BaseModel):
             return LABEL.UNKNOWN.value
 
     def predict(self, X):
-        X_prepared = self._preprocess_dataset(X)
+        X_prepared = self._preprocess_dataset(X, need_scale=False)
         prediction = self.classifier.predict_proba(X_prepared)
         y_proba_list = [self._predict_proba_to_label(proba) for proba in prediction]
         return y_proba_list
 
-    def evaluate(self, prediction, y_test):
+    def evaluate(self, prediction, y_test, classes):
         print(f'Accuracy: {accuracy_score(y_test, prediction):.2f}')
         print(classification_report(y_test, prediction,
-                                    target_names=['cat', 'dog', 'unknown_class']))
+                                    labels=classes))
