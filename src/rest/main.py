@@ -5,10 +5,12 @@ from pydantic import BaseModel
 from PIL import Image, ImageOps
 from skimage.transform import resize
 
-from src.ml.model import LABEL, SKLinearImageModel
+from src.ml.label import LABEL
+from src.ml.sklearn_model import SKLinearImageModel
 
-app = FastAPI(title="Cats and Dogs")
+APP = FastAPI()
 
+IMAGE_SIZE = (150, 150)
 SKLINEAR_MODEL = SKLinearImageModel(pkl_file='trained_models/hog_sklearn.pkl')
 
 DESCRIPTION = """
@@ -28,28 +30,27 @@ class DataResponse(BaseModel):
     - label - class label
     """
     filename: str
-    label: str
+    label: LABEL
 
 
-@app.post("/predict/sklinear",
-          summary="Predict the image class with SKLinearImageModel",
-          description=DESCRIPTION)
-async def predict_sklinear(image: UploadFile = File(...)):
+@APP.post("/predict/sklinear", summary="Predict the image class with SKLinearImageModel",
+          description=DESCRIPTION, response_model=DataResponse)
+async def predict_sklinear(image: UploadFile = File(...), ):
     """
     Predicts image class: 'cat', 'dog', 'unknown', or 'unsupported'.
     Use SKLinearImageModel for prediction
     - **image** : *.jpg file
     """
     if image.filename[-3:] not in ('jpg', 'png'):
-        return DataResponse(**{"filename": image.filename, 'label': 'unsupported'})
+        return DataResponse(**{"filename": image.filename, 'label': LABEL.UNSUPPORTED})
 
     img = Image.open(image.file)
     im = ImageOps.exif_transpose(img)
     im = np.array(im)
 
-    im = resize(im, (150, 150))
+    im = resize(im, IMAGE_SIZE)
     X = np.array([im, ])
     prediction = SKLINEAR_MODEL.predict(X)
-    label = [p.value for p in prediction][0] if prediction else 'unsupported'
+    label = [p.value for p in prediction][0] if prediction else LABEL.UNSUPPORTED
 
     return DataResponse(**{"filename": image.filename, 'label': label})

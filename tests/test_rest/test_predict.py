@@ -2,9 +2,9 @@ import os
 import unittest
 from fastapi.testclient import TestClient
 
-from src.rest.main import app
+from src.rest.main import APP
 
-client = TestClient(app)
+client = TestClient(APP)
 
 
 class RestApiTest(unittest.TestCase):

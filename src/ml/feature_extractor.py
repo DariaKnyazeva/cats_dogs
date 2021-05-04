@@ -6,7 +6,7 @@ import dask.array as da
 import joblib
 import numpy as np
 from PIL import Image, ImageOps
-from typing import Generator, Iterable, Tuple
+from typing import Generator, Iterable, Tuple, List
 from skimage.io import imread
 from sklearn.model_selection import train_test_split
 from skimage.transform import resize
@@ -67,32 +67,36 @@ class ImageFeatureExtractor(BaseImageFeatureExtractor):
         if batch:
             yield batch
 
-    def _transform_image_per_batch(self,
-                                   batch: Iterable[str],
-                                   image_size: Tuple[int, int] = (150, 150)) -> Tuple[np.ndarray,
-                                                                                      np.ndarray]:
+    # def _transform_image_per_batch(self,
+    #                                batch: Iterable[str],
+    #                                image_size: Tuple[int, int] = (150, 150)) -> Tuple[np.ndarray,
+    #                                                                                   np.ndarray]:
+    def _transform_image_per_batch(self, batch, image_size=(150, 150)):
         img_data = defaultdict(list)
         for filepath in batch:
             label = self._get_label_from_filepath(filepath)
 
             im = imread(filepath)
             im = resize(im, image_size)
+            correct_size = image_size + (3, )
+            if im.shape != correct_size:
+                print(f"Corrupted image {filepath}")
+                continue
             img_data['label'].append(label)
             img_data['data'].append(im)
-        X = np.array(img_data['data'])
         y = np.array(img_data['label'])
-
+        X = np.array(img_data['data'])
         return X, y
 
     def transform_image_to_dataset(self,
                                    image_paths: Iterable[str],
                                    image_size: Tuple[int, int] = (150, 150),
-                                   batch_size: int = 1000) -> Generator[Tuple[np.ndarray, np.ndarray],
-                                                                        None,
-                                                                        None]:
+                                   batch_size: int = 1000) -> List[Tuple[np.ndarray, np.ndarray]]:
+        result = []
         for batch in self._batch_slicer(image_paths, int(batch_size)):
             X, y = self._transform_image_per_batch(batch, image_size=image_size)
-            yield (X, y)
+            result.append((X, y))
+        return result
 
     def _get_label_from_filepath(self, filepath: str) -> str:
         """

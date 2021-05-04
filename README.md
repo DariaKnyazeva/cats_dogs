@@ -4,6 +4,8 @@ ML exercise to classify cats and dogs images.
 Implemented and trained model that uses `sklearn.linear_model.SGDClassifier` classifier.
 The input image is resized to 150x150 pixels by default, and transformed into `numpy array`. Some data preprocessing takes place before model training and prediction: RGB is transgormed to grey and then [hogified](https://learnopencv.com/histogram-of-oriented-gradients/).
 
+Started to integrate TensorFlow model class for training; use ready trained model file cats_and_dogs_86.tf. It can be used by specifying in command line script for prediction.
+
 It is possible to use more precise models by inheriting from the abstraction `ml.model.BaseModel`, which provides interface for training and prediction.
 
 ## Environment setup:
@@ -72,7 +74,7 @@ weighted avg       0.68      0.67      0.67      5000
 ### Classify images from the provided directory
 
 usage: 
-`python cats_and_dogs [-h] [--dir DIR] [--pkl_file PKL_FILE]`
+`python cats_and_dogs.py [-h] [-f PKL_FILE] [-p PROBABILITY_THRESHOLD] [-m {ModelUsageType.tf,ModelUsageType.sk}] dir`
 
 Cats and docs recogniser.
 
@@ -81,6 +83,7 @@ optional arguments:
   * --dir DIR            Path to the input directory with image files.
   * --pkl_file PKL_FILE  Pickle or file name to load the trained model from. Default is 'trained_models/hog_sklearn.pkl'
   * -p, --probability_threshold PROBABILITY_THRESHOLD. Limit to accept probability to predict a class. Default is 0.75
+  * -m', '--model_type' MODEL_TYPE. Scikitlearn or Tensorflow model. Default is tf. 
 
 ```
 additional information:
@@ -94,7 +97,8 @@ additional information:
         image_3.jpg: ['unknown_class']
         image_4.jpg: ['cat']
     Example usage:
-        python cats_and_dogs.py --dir data/demo --pkl_file trained_models/hog_sklearn.pkl
+        python cats_and_dogs.py data/demo -m sk -f trained_models/hog_sklearn.pkl
+        python cats_and_dogs.py data/demo -m tf
 ```
 
 ## Run unit tests
@@ -111,7 +115,7 @@ pytest
 
 `source venv/bin/activate`
 
-`uvicorn src.rest.main:app --reload`
+`uvicorn asgi:app --reload`
 
 ### Swagger documentation
 

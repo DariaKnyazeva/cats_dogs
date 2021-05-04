@@ -1,2 +1,3 @@
 from .feature_extractor import ImageFeatureExtractor
-from .model import SKLinearImageModel
+from .sklearn_model import SKLinearImageModel
+from .tf_model import TFModel

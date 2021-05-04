@@ -33,7 +33,7 @@ class SKLinearImageModelTest(unittest.TestCase):
 
     @mock.patch.object(ParallelPostFit, 'predict_proba')
     @mock.patch.object(ParallelPostFit, 'fit')
-    @mock.patch('src.ml.model.SKLinearImageModel._preprocess_dataset')
+    @mock.patch('src.ml.sklearn_model.SKLinearImageModel._preprocess_dataset')
     def test_train(self, mock_preprocess_ds, mock_fit, mock_predict_proba):
         X_train, X_test, y_train, y_test = train_test_split(
             self.X,
@@ -56,9 +56,9 @@ class SKLinearImageModelTest(unittest.TestCase):
 
         mock_predict_proba.assert_called_once()
 
-    @mock.patch('src.ml.model.SKLinearImageModel._preprocess_dataset')
+    @mock.patch('src.ml.sklearn_model.SKLinearImageModel._preprocess_dataset')
     @mock.patch.object(ParallelPostFit, 'predict_proba')
-    @mock.patch('src.ml.model.SKLinearImageModel.load')
+    @mock.patch('src.ml.sklearn_model.SKLinearImageModel.load')
     def test_predict(self, mock_load, mock_predict, mock_preprocess_ds):
         mock_load.return_value = ParallelPostFit()
         mock_preprocess_ds.return_value = [1, 2, 3]
