@@ -65,6 +65,5 @@ if __name__ == "__main__":
     batches = feature_extractor.transform_image_to_dataset(dir_parser.full_path_image_files,
                                                            batch_size=batch_size)
     X_train, y_train, X_test, y_test = feature_extractor.combine_batches(batches=batches)
-
     model.train(X_train, y_train, X_test, y_test)
     model.save(pkl_file)

@@ -140,7 +140,7 @@ class SKLinearImageModel(BaseModel):
         X_test_prepared = self._preprocess_dataset(X_test)
         prediction = self.classifier.predict_proba(X_test_prepared)
 
-        y_proba_list = [self._predict_proba_to_label(proba) for proba in prediction]
+        y_proba_list = [self._predict_proba_to_label(proba).value for proba in prediction]
 
         if verbose:
             self.evaluate(y_proba_list, y_test, classes=self.classifier.classes_)
