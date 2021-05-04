@@ -54,4 +54,4 @@ if __name__ == "__main__":
         batches = feature_extractor.transform_image_to_dataset([filepath])
         for (X, y) in batches:
             prediction = model.predict(X)
-            print(f"{filepath}: {prediction}")
+            print(f"{filepath}: {[p.value for p in prediction][0]}")

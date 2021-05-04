@@ -42,11 +42,12 @@ async def predict_sklinear(image: UploadFile = File(...),
     - **image** : *.jpg file
     """
     if image.filename[-3:] not in ('jpg', 'png'):
-        return {"filename": image.filename, 'label': 'unsupported'}
+        return DataResponse(**{"filename": image.filename, 'label': 'unsupported'})
 
     im = imread(image.file)
     im = resize(im, (150, 150))
     X = np.array([im, ])
-    label = SKLINEAR_MODEL.predict(X)
+    prediction = SKLINEAR_MODEL.predict(X)
+    label = [p.value for p in prediction][0] if prediction else 'unsupported'
 
     return DataResponse(**{"filename": image.filename, 'label': label})

@@ -1,9 +1,12 @@
 """
 Module for classification model optimization
 """
+import numpy as np
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import GridSearchCV
 from sklearn import svm
+
+from ml.model import BaseModel, T
 
 
 class ImageModelOptimiser:
@@ -11,7 +14,7 @@ class ImageModelOptimiser:
     Image classifier model optimization
     """
 
-    def __init__(self, model):
+    def __init__(self, model: BaseModel) -> None:
         self.HOG_pipeline = Pipeline([
             ('grayify', model.grayify),
             ('hogify', model.hogify),
@@ -36,7 +39,11 @@ class ImageModelOptimiser:
             }
         ]
 
-    def optimize(self, X, y):
+    def optimize(self, X: np.ndarray, y: np.ndarray) -> T:
+        """
+        Run fit with all sets of parameters.
+        Returns the most optimal classifier.
+        """
         grid_search = GridSearchCV(self.HOG_pipeline,
                                    self.param_grid,
                                    cv=3,  # cross validation: 3 folds
