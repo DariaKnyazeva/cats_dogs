@@ -2,7 +2,7 @@ import numpy as np
 
 from fastapi import FastAPI, File, UploadFile
 from pydantic import BaseModel
-from skimage.io import imread
+from PIL import Image, ImageOps
 from skimage.transform import resize
 
 from ml import SKLinearImageModel
@@ -29,7 +29,7 @@ class DataResponse(BaseModel):
     - label - class label
     """
     filename: str
-    label: LABEL
+    label: str
 
 
 @app.post("/predict/sklinear")
@@ -44,9 +44,13 @@ async def predict_sklinear(image: UploadFile = File(...),
     if image.filename[-3:] not in ('jpg', 'png'):
         return {"filename": image.filename, 'label': 'unsupported'}
 
-    im = imread(image.file)
+    img = Image.open(image.file)
+    im = ImageOps.exif_transpose(img)
+    im = np.array(im)
+
     im = resize(im, (150, 150))
     X = np.array([im, ])
-    label = SKLINEAR_MODEL.predict(X)
+    prediction = SKLINEAR_MODEL.predict(X)
+    label = prediction[0] if prediction else 'unsupported'
 
     return DataResponse(**{"filename": image.filename, 'label': label})
