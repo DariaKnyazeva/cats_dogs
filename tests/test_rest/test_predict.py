@@ -2,7 +2,7 @@ import os
 import unittest
 from fastapi.testclient import TestClient
 
-from rest.main import app
+from src.rest.main import app
 
 client = TestClient(app)
 
@@ -19,7 +19,7 @@ class RestApiTest(unittest.TestCase):
             self.assertEqual('1.txt', content['filename'])
             self.assertEqual('unsupported', content['label'])
 
-    def _test_predict_sklinear(self):
+    def test_predict_sklinear(self):
         base_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
         fpath = os.path.join(base_path, 'data/dir_test/cat.780.jpg')
         with open(fpath, "rb") as f:

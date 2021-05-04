@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Optional, Tuple
 
 import numpy as np
 from skimage.feature import hog
@@ -11,7 +11,7 @@ class HogTransformer(BaseEstimator, TransformerMixin):
     Calculates hog features for each img
     """
 
-    def __init__(self, y: np.ndarray = None,
+    def __init__(self, y: Optional[np.ndarray],
                  orientations: int = 9,
                  pixels_per_cell: Tuple[int, int] = (8, 8),
                  cells_per_block: Tuple[int, int] = (3, 3),
@@ -22,7 +22,7 @@ class HogTransformer(BaseEstimator, TransformerMixin):
         self.cells_per_block = cells_per_block
         self.block_norm = block_norm
 
-    def fit(self, X: np.ndarray, y: np.ndarray = None) -> TransformerMixin:
+    def fit(self, X: np.ndarray, y: np.ndarray = None) -> BaseEstimator:
         return self
 
     def transform(self, X: np.ndarray, y: np.ndarray = None) -> np.ndarray:

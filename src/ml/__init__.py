@@ -1,2 +1,2 @@
 from .feature_extractor import ImageFeatureExtractor
-from .sklearn.model import SKLinearImageModel
+from .model import SKLinearImageModel

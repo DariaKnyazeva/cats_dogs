@@ -1,7 +1,7 @@
 import os
 import unittest
 
-from directory_parser import DirectoryParser
+from src.directory_parser import DirectoryParser
 
 
 class DirectoryParserTest(unittest.TestCase):

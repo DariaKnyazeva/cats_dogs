@@ -3,7 +3,7 @@ import unittest
 from PIL import Image
 
 
-from ml import ImageFeatureExtractor
+from src.ml import ImageFeatureExtractor
 
 
 class TestImageFeatureExtractor(unittest.TestCase):

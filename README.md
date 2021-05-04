@@ -9,12 +9,6 @@ It is possible to use more precise models by inheriting from the abstraction `ml
 ## Environment setup:
 Use Python 3.7
 
-Add src to python path 
-
-```
-export PYTHONPATH=$PYTHONPATH:src
-```
-
 Install virtual environment:
 ```
 virtualenv -p python3.7 venv

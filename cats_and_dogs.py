@@ -2,8 +2,8 @@ import argparse
 import sys
 import textwrap
 
-from ml import ImageFeatureExtractor, SKLinearImageModel
-from directory_parser import DirectoryParser
+from src.ml import ImageFeatureExtractor, SKLinearImageModel
+from src.directory_parser import DirectoryParser
 
 
 DOC = """
@@ -46,7 +46,7 @@ if __name__ == "__main__":
 
     print(dir_parser)
 
-    model = SKLinearImageModel(pkl_file=pkl_file, load_model=True,
+    model = SKLinearImageModel(pkl_file=pkl_file,
                                probability_threshold=probability_threshold)
     feature_extractor = ImageFeatureExtractor()
 

@@ -22,7 +22,7 @@ class BaseImageFeatureExtractor(ABC):
                                    image_paths: Iterable[str],
                                    image_size: Tuple[int, int] = (150, 150),
                                    batch_size: int = 1000) -> Generator[Tuple[np.ndarray, np.ndarray],
-                                                                        Tuple[np.ndarray, np.ndarray],
+                                                                        None,
                                                                         None]:
         """
         Rescales image from the given filepath to the provided image size
@@ -55,7 +55,7 @@ class ImageFeatureExtractor(BaseImageFeatureExtractor):
 
     def _batch_slicer(self,
                       iterable: Iterable,
-                      size: int = 1000) -> Generator[list, list, None]:
+                      size: int = 1000) -> Generator[list, None, None]:
         batch = []
 
         for i, item in enumerate(iterable, start=1):
@@ -88,7 +88,7 @@ class ImageFeatureExtractor(BaseImageFeatureExtractor):
                                    image_paths: Iterable[str],
                                    image_size: Tuple[int, int] = (150, 150),
                                    batch_size: int = 1000) -> Generator[Tuple[np.ndarray, np.ndarray],
-                                                                        Tuple[np.ndarray, np.ndarray],
+                                                                        None,
                                                                         None]:
         for batch in self._batch_slicer(image_paths, int(batch_size)):
             X, y = self._transform_image_per_batch(batch, image_size=image_size)
