@@ -111,7 +111,7 @@ pytest
 
 `source venv/bin/activate`
 
-`uvicorn rest.main:app --reload`
+`uvicorn src.rest.main:app --reload`
 
 ### Swagger documentation
 
